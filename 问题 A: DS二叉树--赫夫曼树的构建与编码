@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=1e5+15;
+typedef pair<ll,ll> pll;
+
+struct Node{
+	int idx;//下标 
+	int lson,rson,par;//左右孩子，祖先
+	int w;//权重 
+	bool operator<(const Node& b) const{
+		if(w!=b.w)
+			return w>b.w;
+		else
+			return idx>b.idx; 
+	}//重载比较操作符以便pq的排序 
+}tree[N];
+
+void decode(int rt)
+{
+	if(tree[rt].par==0)
+		return;//解码一直到根结点 
+	decode(tree[rt].par);
+	//自下而上,递归的进行父结点的解码 
+	printf("%d",tree[tree[rt].par].rson==rt);
+	//解码到根结点的时候才依次输出(栈的思想) 
+}
+
+int main()
+{
+	int t;
+	cin>>t;
+	while(t--)
+	{
+		priority_queue<Node> que;//结点的优先级队列 
+		int n; 
+		cin>>n;
+		for(int i=1;i<=n;i++)
+		{
+			int w;
+			cin>>w;
+			tree[i]=Node{i,0,0,0,w};//赋值 
+			que.push(tree[i]);
+		}
+		for(int i=n+1;i<=2*n-1;i++)
+		{
+			Node t1=que.top();
+			que.pop();
+			Node t2=que.top();
+			que.pop();
+			tree[i]=Node{i,t1.idx,t2.idx,0,t1.w+t2.w};
+			//生成父结点,并定义自上而下的关系 
+			que.push(tree[i]);//将父结点推入pq,重新排序 
+			tree[t1.idx].par=tree[t2.idx].par=i;//自下而上 
+		} 
+		for(int i=1;i<=n;i++)
+		{
+			printf("%d-",tree[i].w);
+			decode(i);
+			puts("");//换行 
+		} 
+	}
+	return 0;
+}
